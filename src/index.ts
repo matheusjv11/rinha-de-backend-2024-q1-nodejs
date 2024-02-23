@@ -1,20 +1,9 @@
 import Fastify from "fastify";
-import { TransactionController } from "./transaction/infra/transaction.controller";
-import { StatementController } from "./statement/infra/statement.controller";
+import { configRoutes } from "./routes";
 
 const server = Fastify();
 
-server.get("/", (_, res) => {
-  res.send("I'm working");
-});
-
-server.post("/clientes/:id/transacoes", (req, res) => {
-  TransactionController.create(req, res);
-});
-
-server.get("/clientes/:id/extrato", (req, res) => {
-  StatementController.findOne(req, res);
-});
+configRoutes(server);
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {

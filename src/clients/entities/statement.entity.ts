@@ -1,5 +1,5 @@
 import { Entity } from "../../shared/domain/entities/entity";
-import { TransactionOutput } from "../../transaction/application/transaction-output";
+import { TransactionOutput } from "../../transaction/application/dto/transaction-output";
 
 type StatementProps = {
   total: number;
