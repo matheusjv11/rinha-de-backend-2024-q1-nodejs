@@ -1,15 +1,17 @@
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 
-export async function connect() {
-  if (global.connection) {
-    return global.connection.connect();
+const pool = new Pool({
+  connectionString: "postgres://admin:123@localhost:5432/rinha",
+});
+
+let client: PoolClient | null = null;
+
+export const connect = async () => {
+  if (client) {
+    return client;
   }
 
-  const pool = new Pool({
-    connectionString: "postgres://admin:123@localhost:5432/rinha",
-  });
+  client = await pool.connect();
 
-  global.connection = pool;
-
-  return pool.connect();
-}
+  return client;
+};

@@ -20,6 +20,12 @@ export namespace CreateTransaction {
   };
 
   export class UseCase implements DefaultUseCase<Input, Output> {
+    private repository: TransactionPgRepository;
+
+    constructor() {
+      this.repository = new TransactionPgRepository();
+    }
+
     async execute(input: Input): Promise<Output> {
       if (!input.valor || !input.descricao || !input.tipo || input.client_id) {
         /* throw new BadRequestError("Invalid form body"); */
@@ -27,16 +33,7 @@ export namespace CreateTransaction {
 
       const transaction = new TransactionEntity(input);
 
-      // TODO: Initialize database globally instead of inside the code
-      const pool = new Pool({
-        connectionString: "postgres://admin:123@localhost:5432/rinha",
-      });
-
-      const pgClient = await pool.connect();
-
-      const result = await new TransactionPgRepository(pgClient).create(
-        transaction
-      );
+      const result = await this.repository.create(transaction);
 
       return {
         limite: 0,

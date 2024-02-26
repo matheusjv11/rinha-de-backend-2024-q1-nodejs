@@ -1,5 +1,10 @@
 import { PoolClient } from "pg";
+import { connect } from "../postgres.client";
 
 export abstract class PostgresRepository {
-  constructor(protected db: PoolClient) {}
+  protected db: Promise<PoolClient>;
+
+  constructor() {
+    this.db = connect();
+  }
 }

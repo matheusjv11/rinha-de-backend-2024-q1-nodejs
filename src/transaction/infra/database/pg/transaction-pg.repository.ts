@@ -8,12 +8,9 @@ export class TransactionPgRepository extends PostgresRepository {
     const sql =
       "INSERT INTO transacoes(cliente_id, valor, tipo, descricao) VALUES($1, $2, $3, $4) RETURNING id";
 
-    const result = await this.db.query(sql, [
-      client_id,
-      valor,
-      tipo,
-      descricao,
-    ]);
+    const result = await (
+      await this.db
+    ).query(sql, [client_id, valor, tipo, descricao]);
 
     return result;
   }
