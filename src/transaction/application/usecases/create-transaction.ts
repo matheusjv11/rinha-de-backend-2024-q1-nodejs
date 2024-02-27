@@ -1,10 +1,7 @@
-import { exit } from "process";
-import { BadRequestError } from "../../../shared/application/erros/bad-request-error";
+import { FastifyReply } from "fastify";
 import { DefaultUseCase } from "../../../shared/application/usecase/default-usecase";
-import { connect } from "../../../shared/infra/database/postgres/postgres.client";
 import { TransactionEntity } from "../../entities/transaction.entity";
 import { TransactionPgRepository } from "../../infra/database/pg/transaction-pg.repository";
-import { Pool } from "pg";
 
 export namespace CreateTransaction {
   export type Input = {
@@ -26,19 +23,36 @@ export namespace CreateTransaction {
       this.repository = new TransactionPgRepository();
     }
 
-    async execute(input: Input): Promise<Output> {
-      if (!input.valor || !input.descricao || !input.tipo || input.client_id) {
-        /* throw new BadRequestError("Invalid form body"); */
+    async execute(input: Input, res: FastifyReply): Promise<Output> {
+      // Input does not match the requirements
+      if (!this.isValidBody(input)) {
+        return res.code(422).send();
+      }
+
+      // Not found user
+      if (![1, 2, 3, 4, 5].includes(+input.client_id)) {
+        return res.code(404).send();
       }
 
       const transaction = new TransactionEntity(input);
 
-      const result = await this.repository.create(transaction);
+      try {
+        return await this.repository.create(transaction);
+      } catch (error) {
+        return res.code(422).send();
+      }
+    }
 
-      return {
-        limite: 0,
-        saldo: 0,
-      };
+    private isValidBody(input: Input): boolean {
+      if (!input.valor || !input.descricao || !input.tipo || !input.client_id) {
+        return false;
+      }
+
+      if (input.descricao.length > 10) return false;
+
+      if (!["d", "c"].includes(input.tipo)) return false;
+
+      return true;
     }
   }
 }
