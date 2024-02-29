@@ -38,6 +38,7 @@ services:
       - rinha_network
   api01: &api
     image: matheusjv11/api-rinha-q1-2024:latest
+    #build: .
     hostname: api01
     ports:
       - "8081:8080"

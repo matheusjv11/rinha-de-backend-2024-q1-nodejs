@@ -6,7 +6,7 @@ const server = Fastify();
 
 configRoutes(server);
 
-server.listen({ port: 8080 }, async (err, address) => {
+server.listen({ port: 8080, host: "0.0.0.0" }, async (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);

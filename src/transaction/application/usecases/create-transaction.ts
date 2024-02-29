@@ -48,7 +48,10 @@ export namespace CreateTransaction {
         return false;
       }
 
-      if (input.descricao.length > 10) return false;
+      if (typeof input.descricao !== "string" || input.descricao.length > 10)
+        return false;
+
+      if (typeof input.valor !== "number") return false;
 
       if (!["d", "c"].includes(input.tipo)) return false;
 
