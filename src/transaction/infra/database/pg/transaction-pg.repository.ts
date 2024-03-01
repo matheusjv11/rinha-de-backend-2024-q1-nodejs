@@ -1,13 +1,13 @@
 import { ClientOutput } from "../../../../clients/application/dto/client-output";
-import { PostgresRepository } from "../../../../shared/infra/database/postgres/repository/postgres.respository";
+import { connect } from "../../../../shared/infra/database/postgres/postgres.client";
 import { CreateTransaction } from "../../../application/usecases/create-transaction";
 import { TransactionEntity } from "../../../entities/transaction.entity";
 
-export class TransactionPgRepository extends PostgresRepository {
+export class TransactionPgRepository {
   async create(
     transaction: TransactionEntity
   ): Promise<CreateTransaction.Output> {
-    const db_connection = await this.db;
+    const db_connection = await connect();
     const { client_id, valor, tipo, descricao } = transaction;
 
     try {
@@ -16,12 +16,13 @@ export class TransactionPgRepository extends PostgresRepository {
       const {
         rows: [client],
       } = await db_connection.query<ClientOutput>(
-        `SELECT saldo, limite FROM clientes WHERE clientes.id = ${client_id} SELECT FOR UPDATE`
+        `SELECT saldo, limite FROM clientes WHERE clientes.id = ${client_id} FOR UPDATE`
       );
 
       let newBalance =
         tipo === "c" ? client.saldo + valor : client.saldo - valor;
 
+      console.log(client, " - ", transaction, " - ", newBalance);
       if (tipo === "d" && newBalance + client.limite < 0) {
         throw Error("Insuficient balance");
       }

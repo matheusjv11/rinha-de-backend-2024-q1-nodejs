@@ -1,6 +1,6 @@
 # Use este script para executar testes locais
 $RESULTS_WORKSPACE = "$(Get-Location)\user-files\results"
-$GATLING_BIN_DIR = "$env:USERPROFILE\Documents\gatling\3.10.3\bin"
+$GATLING_BIN_DIR = "$env:USERPROFILE\Documents\gatling\bin"
 $GATLING_WORKSPACE = "$(Get-Location)\user-files"
 
 function Run-Gatling {

@@ -1,35 +1,44 @@
-import { PostgresRepository } from "../../../../shared/infra/database/postgres/repository/postgres.respository";
+import { connect } from "../../../../shared/infra/database/postgres/postgres.client";
 import { GenerateStatement } from "../../../application/usecases/generate-statement";
 
-export class ClientPgRepository extends PostgresRepository {
+export class ClientPgRepository {
   async statement(id: number): Promise<GenerateStatement.Output> {
-    const sql = `
-    SELECT
-        json_build_object(
-            'limite', clientes.limite,
-        'saldo', clientes.saldo,
-        'data_extrato', now() 
-        )  as saldo,
-        jsonb_agg(
+    const db_connection = await connect();
+
+    try {
+      const sql = `
+        SELECT
             json_build_object(
-                'valor', transacoes.valor,
-                'tipo', transacoes.tipo,
-                'descricao', transacoes.descricao,
-                'realizada_em', transacoes.realizada_em
-            ) 
-        ) as ultimas_transacoes
-    FROM 
-        clientes
-    JOIN
-        transacoes ON clientes.id = transacoes.cliente_id
-    WHERE 
-        clientes.id = ${id}
-    GROUP BY 
-        clientes.id, clientes.nome;
-    `;
+                'limite', clientes.limite,
+                'saldo', clientes.saldo,
+                'data_extrato', now() 
+            ) AS saldo,
+            CASE
+                WHEN COUNT(transacoes.id) = 0 THEN jsonb_build_array()
+                ELSE jsonb_agg(
+                    json_build_object(
+                        'valor', transacoes.valor,
+                        'tipo', transacoes.tipo,
+                        'descricao', transacoes.descricao,
+                        'realizada_em', transacoes.realizada_em
+                    ) 
+                )
+            END AS ultimas_transacoes
+        FROM 
+            clientes
+        LEFT JOIN
+            transacoes ON clientes.id = transacoes.cliente_id
+        WHERE 
+            clientes.id = ${id}
+        GROUP BY 
+            clientes.id, clientes.nome;
+        `;
 
-    const result = await (await this.db).query<GenerateStatement.Output>(sql);
+      const result = await db_connection.query<GenerateStatement.Output>(sql);
 
-    return result.rows[0];
+      return result.rows[0];
+    } finally {
+      db_connection.release();
+    }
   }
 }

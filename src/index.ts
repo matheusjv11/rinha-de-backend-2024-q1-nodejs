@@ -1,6 +1,5 @@
 import Fastify from "fastify";
 import { configRoutes } from "./routes";
-import { connect } from "./shared/infra/database/postgres/postgres.client";
 
 const server = Fastify();
 
@@ -11,8 +10,6 @@ server.listen({ port: 8080, host: "0.0.0.0" }, async (err, address) => {
     console.error(err);
     process.exit(1);
   }
-
-  await connect();
 
   console.log(`Server runnig at ${address}`);
 });
